@@ -2,12 +2,34 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>عرض ملف CSV</title>
+  <title>تسجيل الدخول لعرض ملف CSV</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       direction: rtl;
       padding: 20px;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+      padding: 30px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
     }
     .scrollable-table {
       overflow: auto;
@@ -27,74 +49,90 @@
     th {
       background-color: #f2f2f2;
     }
-    #downloadBtn {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
 
-  <h2>عرض ملف researchers.csv</h2>
-
-  <div class="scrollable-table">
-    <table id="csvTable">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+  <div id="login" class="login-container">
+    <h2>تسجيل الدخول</h2>
+    <input type="text" id="username" placeholder="اسم المستخدم" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <button onclick="login()">دخول</button>
   </div>
 
-  <button id="downloadBtn">تحميل الملف</button>
+  <div id="csvSection" class="hidden">
+    <h2>عرض ملف researchers.csv</h2>
+    <div class="scrollable-table">
+      <table id="csvTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <button onclick="downloadCSV()">تحميل الملف</button>
+  </div>
 
   <script>
-    const fileName = "researchers.csv";
+    const USERNAME = "admin";
+    const PASSWORD = "1234";
+    const FILE_NAME = "researchers.csv";
 
-    fetch(fileName)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("فشل تحميل الملف");
-        }
-        return response.text();
-      })
-      .then(data => {
-        const lines = data.trim().split("\n");
-        const table = document.getElementById("csvTable");
-        const thead = table.querySelector("thead");
-        const tbody = table.querySelector("tbody");
+    function login() {
+      const enteredUser = document.getElementById("username").value;
+      const enteredPass = document.getElementById("password").value;
 
-        const headers = lines[0].split(",");
-        const headRow = document.createElement("tr");
-        headers.forEach(header => {
-          const th = document.createElement("th");
-          th.textContent = header;
-          headRow.appendChild(th);
-        });
-        thead.appendChild(headRow);
+      if (enteredUser === USERNAME && enteredPass === PASSWORD) {
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("csvSection").classList.remove("hidden");
+        loadCSV();
+      } else {
+        alert("اسم المستخدم أو كلمة المرور غير صحيحة.");
+      }
+    }
 
-        for (let i = 1; i < lines.length; i++) {
-          const row = document.createElement("tr");
-          const cells = lines[i].split(",");
-          cells.forEach(cell => {
-            const td = document.createElement("td");
-            td.textContent = cell;
-            row.appendChild(td);
+    function loadCSV() {
+      fetch(FILE_NAME)
+        .then(response => {
+          if (!response.ok) throw new Error("فشل تحميل الملف");
+          return response.text();
+        })
+        .then(data => {
+          const lines = data.trim().split("\n");
+          const table = document.getElementById("csvTable");
+          const thead = table.querySelector("thead");
+          const tbody = table.querySelector("tbody");
+
+          const headers = lines[0].split(",");
+          const headRow = document.createElement("tr");
+          headers.forEach(header => {
+            const th = document.createElement("th");
+            th.textContent = header;
+            headRow.appendChild(th);
           });
-          tbody.appendChild(row);
-        }
-      })
-      .catch(error => {
-        console.error("خطأ في تحميل الملف:", error);
-        alert("تعذر تحميل ملف CSV. تأكد أن الملف موجود في نفس مجلد الصفحة.");
-      });
+          thead.appendChild(headRow);
 
-    document.getElementById("downloadBtn").addEventListener("click", () => {
+          for (let i = 1; i < lines.length; i++) {
+            const row = document.createElement("tr");
+            const cells = lines[i].split(",");
+            cells.forEach(cell => {
+              const td = document.createElement("td");
+              td.textContent = cell;
+              row.appendChild(td);
+            });
+            tbody.appendChild(row);
+          }
+        })
+        .catch(error => {
+          alert("تعذر تحميل ملف CSV. تأكد أن الملف موجود.");
+          console.error(error);
+        });
+    }
+
+    function downloadCSV() {
       const link = document.createElement("a");
-      link.href = fileName;
-      link.download = fileName;
+      link.href = FILE_NAME;
+      link.download = FILE_NAME;
       link.click();
-    });
+    }
   </script>
 
 </body>
