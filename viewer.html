@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>عرض ملف الباحثين</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 20px;
+    }
+    .scrollable-table {
+      overflow: auto;
+      max-height: 500px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: right;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    #notice {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="notice">✅ تم تسجيل الدخول بنجاح. انقر أدناه لعرض الملف.</div>
+  <div class="scrollable-table">
+    <table id="csvTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <br>
+  <button onclick="downloadCSV()">تحميل الملف</button>
+
+  <script>
+    if (sessionStorage.getItem("loggedIn") !== "true") {
+      alert("يرجى تسجيل الدخول أولاً.");
+      window.location.href = "login.html";
+    }
+
+    const FILE_NAME = "researchers.csv";
+
+    fetch(FILE_NAME)
+      .then(response => response.text())
+      .then(data => {
+        const lines = data.trim().split("\n");
+        const headers = lines[0].split(",");
+        const thead = document.querySelector("#csvTable thead");
+        const tbody = document.querySelector("#csvTable tbody");
+
+        const headerRow = document.createElement("tr");
+        headers.forEach(h => {
+          const th = document.createElement("th");
+          th.textContent = h;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        for (let i = 1; i < lines.length; i++) {
+          const row = document.createElement("tr");
+          lines[i].split(",").forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell;
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+        }
+      })
+      .catch(err => {
+        alert("تعذر تحميل الملف.");
+        console.error(err);
+      });
+
+    function downloadCSV() {
+      const link = document.createElement("a");
+      link.href = FILE_NAME;
+      link.download = FILE_NAME;
+      link.click();
+    }
+  </script>
+
+</body>
+</html>

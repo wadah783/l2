@@ -2,25 +2,18 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>تسجيل الدخول لعرض CSV</title>
+  <title>تسجيل الدخول</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       direction: rtl;
-      padding: 20px;
-    }
-    .login-container {
-      max-width: 400px;
-      margin: auto;
       text-align: center;
-      padding: 30px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+      margin-top: 100px;
     }
     input {
-      width: 90%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 10px;
+      width: 250px;
       font-size: 16px;
     }
     button {
@@ -28,115 +21,30 @@
       font-size: 16px;
       cursor: pointer;
     }
-    .hidden {
-      display: none;
-    }
-    .scrollable-table {
-      overflow: auto;
-      max-height: 500px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 800px;
-    }
-    th, td {
-      border: 1px solid #999;
-      padding: 8px;
-      text-align: right;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
   </style>
 </head>
 <body>
 
-  <div id="login" class="login-container">
-    <h2>تسجيل الدخول</h2>
-    <input type="text" id="username" placeholder="اسم المستخدم" autocomplete="off" />
-    <input type="password" id="password" placeholder="كلمة المرور" autocomplete="off" />
-    <button onclick="login()">دخول</button>
-  </div>
-
-  <div id="csvSection" class="hidden">
-    <h2>عرض ملف researchers.csv</h2>
-    <div class="scrollable-table">
-      <table id="csvTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <button onclick="downloadCSV()">تحميل الملف</button>
-  </div>
+  <h2>يرجى تسجيل الدخول</h2>
+  <input type="text" id="username" placeholder="اسم المستخدم"><br>
+  <input type="password" id="password" placeholder="كلمة المرور"><br>
+  <button onclick="login()">دخول</button>
 
   <script>
-    const USERNAME = "admin";
-    const PASSWORD = "1234";
-    const FILE_NAME = "researchers.csv";
+    const USER = "admin";
+    const PASS = "1234";
 
     function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value;
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
 
-      if (user === USERNAME && pass === PASSWORD) {
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("csvSection").classList.remove("hidden");
-        loadCSV();
+      if (u === USER && p === PASS) {
+        // تخزين جلسة بسيطة (غير آمنة لكن تنفع لعرض فقط)
+        sessionStorage.setItem("loggedIn", "true");
+        window.location.href = "viewer.html";
       } else {
-        alert("اسم المستخدم أو كلمة المرور غير صحيحة.");
+        alert("اسم المستخدم أو كلمة المرور خاطئة.");
       }
-    }
-
-    function loadCSV() {
-      fetch(FILE_NAME)
-        .then(response => {
-          if (!response.ok) throw new Error("فشل تحميل الملف");
-          return response.text();
-        })
-        .then(data => {
-          const lines = data.trim().split("\n");
-          const table = document.getElementById("csvTable");
-          const thead = table.querySelector("thead");
-          const tbody = table.querySelector("tbody");
-
-          // تنظيف الجدول
-          thead.innerHTML = "";
-          tbody.innerHTML = "";
-
-          const headers = lines[0].split(",");
-          const headRow = document.createElement("tr");
-          headers.forEach(header => {
-            const th = document.createElement("th");
-            th.textContent = header;
-            headRow.appendChild(th);
-          });
-          thead.appendChild(headRow);
-
-          for (let i = 1; i < lines.length; i++) {
-            const row = document.createElement("tr");
-            const cells = lines[i].split(",");
-            cells.forEach(cell => {
-              const td = document.createElement("td");
-              td.textContent = cell;
-              row.appendChild(td);
-            });
-            tbody.appendChild(row);
-          }
-        })
-        .catch(err => {
-          alert("تعذر تحميل ملف CSV.");
-          console.error(err);
-        });
-    }
-
-    function downloadCSV() {
-      const link = document.createElement("a");
-      link.href = FILE_NAME;
-      link.download = FILE_NAME;
-      link.click();
     }
   </script>
 
