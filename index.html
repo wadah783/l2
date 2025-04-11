@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>عرض ملف CSV</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 20px;
+    }
+    .scrollable-table {
+      overflow: auto;
+      max-height: 500px;
+      border: 1px solid #ccc;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: right;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    #downloadBtn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>عرض ملف researchers.csv</h2>
+
+  <div class="scrollable-table">
+    <table id="csvTable">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <button id="downloadBtn">تحميل الملف</button>
+
+  <script>
+    const fileName = "researchers.csv";
+
+    fetch(fileName)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("فشل تحميل الملف");
+        }
+        return response.text();
+      })
+      .then(data => {
+        const lines = data.trim().split("\n");
+        const table = document.getElementById("csvTable");
+        const thead = table.querySelector("thead");
+        const tbody = table.querySelector("tbody");
+
+        const headers = lines[0].split(",");
+        const headRow = document.createElement("tr");
+        headers.forEach(header => {
+          const th = document.createElement("th");
+          th.textContent = header;
+          headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+
+        for (let i = 1; i < lines.length; i++) {
+          const row = document.createElement("tr");
+          const cells = lines[i].split(",");
+          cells.forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell;
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+        }
+      })
+      .catch(error => {
+        console.error("خطأ في تحميل الملف:", error);
+        alert("تعذر تحميل ملف CSV. تأكد أن الملف موجود في نفس مجلد الصفحة.");
+      });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = fileName;
+      link.download = fileName;
+      link.click();
+    });
+  </script>
+
+</body>
+</html>
